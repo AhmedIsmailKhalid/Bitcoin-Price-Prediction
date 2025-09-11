@@ -6,7 +6,8 @@ from sqlalchemy import text
 
 from src.shared.database import engine, Base
 from src.shared.logging import setup_logging, get_logger
-from src.shared.models import PriceData, CollectionMetadata
+from src.shared.models import PriceData, CollectionMetadata, NewsData
+
 
 
 def create_tables():

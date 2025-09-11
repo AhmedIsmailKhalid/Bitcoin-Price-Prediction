@@ -98,28 +98,15 @@
 - Create database schema for news articles
 - Add text processing and cleaning functionality
 - Test news collection and storage workflow
-```
 
-## Major Milestone Achieved
+### Major Milestone Achieved
 
-You've successfully built:
+Successfully built:
 - Complete database foundation
 - Functional data collection framework
 - Real-time price data integration
 - Error handling and monitoring
 - Scalable collector architecture
-
-## Ready for Day 3?
-
-Day 3 will focus on news data collection:
-- CoinDesk article scraping
-- News data processing
-- Article storage and retrieval
-- Content cleaning and validation
-
-This builds naturally on the collector framework you just created.
-
-**Commit your progress and let me know if you want to continue with Day 3 or take a break!**
 
 ---
 
