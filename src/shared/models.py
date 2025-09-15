@@ -1,6 +1,6 @@
 from sqlalchemy.sql import func
 from ..shared.database import Base
-from sqlalchemy import Column, Integer, String, Float, DateTime, Index, Text
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Float, DateTime, Index, Text
 
 
 class PriceData(Base):
@@ -92,3 +92,46 @@ class NewsData(Base):
     
     def __repr__(self):
         return f"<NewsData(title='{self.title[:50]}...', source={self.data_source}, published={self.published_at})>"
+    
+    
+class SentimentData(Base):
+    __tablename__ = "sentiment_data"
+    
+    # Primary key
+    id = Column(Integer, primary_key=True, index=True)
+    
+    # Foreign key to news article
+    news_article_id = Column(Integer, ForeignKey('news_data.id'), nullable=False)
+    
+    # VADER sentiment scores
+    vader_compound = Column(Float, nullable=False)
+    vader_positive = Column(Float, nullable=False)
+    vader_neutral = Column(Float, nullable=False)
+    vader_negative = Column(Float, nullable=False)
+    
+    # TextBlob sentiment scores
+    textblob_polarity = Column(Float, nullable=False)
+    textblob_subjectivity = Column(Float, nullable=False)
+    
+    # Combined scores
+    combined_sentiment = Column(Float, nullable=False)
+    sentiment_category = Column(String(20), nullable=False)  # positive, negative, neutral
+    
+    # Title vs content analysis
+    title_sentiment = Column(Float, nullable=True)
+    content_sentiment = Column(Float, nullable=True)
+    sentiment_divergence = Column(Float, nullable=True)
+    sentiment_alignment = Column(Boolean, nullable=True)
+    
+    # Processing metadata
+    processed_at = Column(DateTime(timezone=True), server_default=func.now())
+    
+    # Create indexes
+    __table_args__ = (
+        Index('idx_sentiment_article', 'news_article_id'),
+        Index('idx_sentiment_category', 'sentiment_category'),
+        Index('idx_sentiment_score', 'combined_sentiment'),
+    )
+    
+    def __repr__(self):
+        return f"<SentimentData(article_id={self.news_article_id}, sentiment={self.combined_sentiment:.3f}, category={self.sentiment_category})>"

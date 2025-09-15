@@ -2,14 +2,7 @@
 
 ## Day 1: Environment Setup  ✅ COMPLETED
 
-<<<<<<< HEAD
 ### Completed Tasks ─ **09/06/25  18:31:00**
-=======
-## Day 1: Environment Setup  ✅ COMPLETED
-
-### Completed Tasks
-* **09/06/25 - 18:31:00**  
->>>>>>> a105ecb0eae26a545a6776e2f0e0de2712dfc8c3
 ✅ Project structure created (folder: Bitcoin Sentiment Analysis)  
 ✅ Poetry dependencies installed  
 ✅ Environment variables configured  
@@ -101,14 +94,6 @@
 - Metadata tracking: Collection status, timing, record counts
 - Database indexes: Optimized for symbol and timestamp queries
 
-<<<<<<< HEAD
-=======
-### Next Steps for Day 3
-- Implement CoinDesk news scraping collector
-- Create database schema for news articles
-- Add text processing and cleaning functionality
-- Test news collection and storage workflow
->>>>>>> a105ecb0eae26a545a6776e2f0e0de2712dfc8c3
 
 ### Major Milestone Achieved
 
@@ -121,7 +106,6 @@ Successfully built:
 
 ---
 
-<<<<<<< HEAD
 
 ## Day 3: Multi-Source News Collection ✅ COMPLETED
 
@@ -216,5 +200,3 @@ Successfully built:
 - Add sentiment analysis pipeline for news content
 - Create feature engineering for price prediction models
 - Establish data validation and quality monitoring systems
-=======
->>>>>>> a105ecb0eae26a545a6776e2f0e0de2712dfc8c3
