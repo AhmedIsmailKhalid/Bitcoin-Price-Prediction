@@ -1,8 +1,8 @@
-from sqlalchemy import create_engine, MetaData, text  # Add 'text' import
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
-from .config import settings
 import logging
+from .config import settings
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, MetaData, text
+from sqlalchemy.ext.declarative import declarative_base
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +36,7 @@ def test_connection():
     """Test database connection"""
     try:
         with engine.connect() as connection:
-            result = connection.execute(text("SELECT 1"))  # Changed this line
+            _ = connection.execute(text("SELECT 1"))  # Changed this line
             logger.info("Database connection successful")
             return True
     except Exception as e:

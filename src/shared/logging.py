@@ -1,5 +1,5 @@
-import logging
 import sys
+import logging
 from typing import Optional
 from .config import settings
 

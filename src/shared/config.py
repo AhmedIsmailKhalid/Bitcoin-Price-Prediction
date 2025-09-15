@@ -1,8 +1,8 @@
 from typing import Optional
+from dotenv import load_dotenv
+from functools import lru_cache
 from pydantic import PostgresDsn
 from pydantic_settings import BaseSettings
-from functools import lru_cache
-from dotenv import load_dotenv
 
 # Load environment variables from .env.dev
 load_dotenv('.env.dev')
