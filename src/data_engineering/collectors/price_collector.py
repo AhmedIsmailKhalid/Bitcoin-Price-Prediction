@@ -1,13 +1,13 @@
 import requests
 from typing import Dict, List, Any
 from sqlalchemy.orm import Session
-from datetime import datetime
-import time
 
-from .base_collector import BaseCollector
 from src.shared.config import settings
 from src.shared.models import PriceData
-
+from .base_collector import BaseCollector
+from src.shared.database import SessionLocal
+        
+        
 class CoinGeckoCollector(BaseCollector):
     """Collector for CoinGecko price data"""
     
@@ -123,3 +123,12 @@ class CoinGeckoCollector(BaseCollector):
             db.rollback()
             self.logger.error(f"Failed to commit price data: {e}")
             raise
+    
+    def get_recent_data(self, limit: int = 10):
+        """Get recent price data for testing"""
+               
+        db = SessionLocal()
+        try:
+            return db.query(PriceData).order_by(PriceData.collected_at.desc()).limit(limit).all()
+        finally:
+            db.close()

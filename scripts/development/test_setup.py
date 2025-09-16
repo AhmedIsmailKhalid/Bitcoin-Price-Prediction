@@ -3,7 +3,6 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
-
 from src.shared.config import settings
 from src.shared.database import test_connection
 from src.shared.logging import setup_logging, get_logger
@@ -30,7 +29,6 @@ def main():
     
     logger.info("✅ Basic setup test completed successfully")
     return True
-
 
 if __name__ == "__main__":
     success = main()

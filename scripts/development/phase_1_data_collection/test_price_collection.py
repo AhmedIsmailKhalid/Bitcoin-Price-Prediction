@@ -1,13 +1,12 @@
 """Test price data collection"""
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
 
 from src.shared.logging import setup_logging, get_logger
 from src.data_engineering.collectors.price_collector import CoinGeckoCollector
 from src.shared.database import SessionLocal
 from src.shared.models import PriceData, CollectionMetadata
-from sqlalchemy import text
 
 
 def test_price_collection():

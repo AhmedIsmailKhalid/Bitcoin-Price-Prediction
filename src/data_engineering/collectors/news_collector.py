@@ -8,6 +8,7 @@ from typing import Any, Dict, List
 from sqlalchemy.orm import Session
 from src.shared.models import NewsData
 from .base_collector import BaseCollector
+from src.shared.database import SessionLocal
 
 
 class MultiSourceNewsCollector(BaseCollector):
@@ -367,3 +368,12 @@ class MultiSourceNewsCollector(BaseCollector):
             db.rollback()
             self.logger.error(f"Failed to commit news data: {e}")
             raise 
+        
+    def get_recent_articles(self, limit: int = 10):
+        """Get recent news articles for testing"""
+        
+        db = SessionLocal()
+        try:
+            return db.query(NewsData).order_by(NewsData.collected_at.desc()).limit(limit).all()
+        finally:
+            db.close()
