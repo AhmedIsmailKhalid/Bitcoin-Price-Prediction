@@ -1,11 +1,12 @@
 """ML training pipeline for Bitcoin price prediction"""
 import pandas as pd
 from typing import Dict, Any, Tuple
-from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
-
-from src.ml_models.classifiers.logistic_regression import LogisticRegressionModel
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
 from src.ml_models.classifiers.random_forest import RandomForestModel
+from src.ml_models.classifiers.logistic_regression import LogisticRegressionModel
 from src.data_processing.validation.dataset_exporter import MLDatasetExporter
 from src.shared.logging import get_logger
 
@@ -210,3 +211,82 @@ class MLTrainingPipeline:
                     summary['best_model'] = model_name
         
         return summary
+    
+    def train_advanced_models(self, data: Dict[str, Any]) -> Dict[str, Dict[str, float]]:
+        """Train advanced models including XGBoost and ensembles"""
+        self.logger.info("Training advanced models...")
+        
+        X_train = data['X_train']
+        y_train = data['y_train']
+        X_test = data['X_test']
+        y_test = data['y_test']
+        
+        # Import advanced models
+        from src.ml_models.classifiers.xgboost_model import XGBoostModel
+        from src.ml_models.classifiers.gradient_boosting import GradientBoostingModel
+        from src.ml_models.ensembles.voting_ensemble import VotingEnsemble
+        from src.ml_models.evaluation.time_series_validator import TimeSeriesValidator
+        
+        # Initialize advanced models
+        advanced_models = {
+            'xgboost': XGBoostModel(),
+            'gradient_boosting': GradientBoostingModel(),
+        }
+        
+        # Add ensemble if we have baseline models
+        if hasattr(self, 'models') and len(self.models) >= 2:
+            ensemble_estimators = [
+                ('lr', self.models.get('logistic_regression', None)),
+                ('rf', self.models.get('random_forest', None))
+            ]
+            ensemble_estimators = [(name, model) for name, model in ensemble_estimators if model is not None]
+            
+            if len(ensemble_estimators) >= 2:
+                # Create new model instances for ensemble
+                
+                ensemble_models = [
+                    ('lr', LogisticRegression(random_state=42, max_iter=1000)),
+                    ('rf', RandomForestClassifier(random_state=42, n_estimators=50))
+                ]
+                
+                advanced_models['voting_ensemble'] = VotingEnsemble(
+                    estimators=ensemble_models,
+                    voting='soft'
+                )
+
+        
+        results = {}
+        validator = TimeSeriesValidator(n_splits=3)
+        
+        for model_name, model in advanced_models.items():
+            self.logger.info(f"Training {model_name}...")
+            
+            try:
+                # Train model
+                training_metrics = model.train(X_train, y_train)
+                
+                # Evaluate on test set if available
+                if X_test is not None and y_test is not None:
+                    test_metrics = model.evaluate(X_test, y_test)
+                else:
+                    test_metrics = {}
+                
+                # Time-series cross-validation
+                cv_results = validator.validate_model(model, X_train, y_train)
+                
+                # Store model and results
+                self.models[model_name] = model
+                results[model_name] = {
+                    'training_metrics': training_metrics,
+                    'test_metrics': test_metrics,
+                    'cv_results': cv_results,
+                    'feature_importance': model.get_feature_importance()
+                }
+                
+                self.logger.info(f"{model_name} training completed")
+                
+            except Exception as e:
+                self.logger.error(f"Failed to train {model_name}: {e}")
+                results[model_name] = {'error': str(e)}
+        
+        return results
