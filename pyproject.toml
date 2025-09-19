@@ -29,6 +29,7 @@ scikit-learn = "^1.7.2"
 joblib = "^1.5.2"
 xgboost = "^3.0.5"
 lightgbm = "^4.6.0"
+uvicorn = "^0.35.0"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"

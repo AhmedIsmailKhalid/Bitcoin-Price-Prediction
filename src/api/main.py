@@ -1,9 +1,11 @@
 """FastAPI application for Bitcoin prediction service"""
+import time
 from datetime import datetime
 from typing import Dict, Any
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from src.monitoring.api_metrics import api_metrics
 
 from src.api.models import (
     PredictionRequest, PredictionResponse, ModelInfo, 
@@ -68,8 +70,11 @@ async def health_check():
 
 
 @app.post("/predict", response_model=PredictionResponse)
+@api_metrics.performance_monitor("/predict")
 async def predict(request: PredictionRequest):
     """Make price direction prediction"""
+    start_time = time.time()
+    
     try:
         # Validate features
         is_valid, validation_message = prediction_service.validate_features(
@@ -77,11 +82,21 @@ async def predict(request: PredictionRequest):
         )
         
         if not is_valid:
+            api_metrics.track_error("/predict", "ValidationError")
             raise HTTPException(status_code=400, detail=validation_message)
         
         # Make prediction
         prediction, probability, confidence = prediction_service.predict(
             request.features, request.model_name, request.version
+        )
+        
+        # Calculate response time
+        response_time_ms = (time.time() - start_time) * 1000
+        
+        # Track prediction
+        api_metrics.track_prediction(
+            request.model_name, request.version, request.features,
+            prediction, probability, confidence, response_time_ms
         )
         
         return PredictionResponse(
@@ -96,6 +111,7 @@ async def predict(request: PredictionRequest):
     except HTTPException:
         raise
     except Exception as e:
+        api_metrics.track_error("/predict", "InternalError")
         logger.error(f"Prediction failed: {e}")
         raise HTTPException(status_code=500, detail=f"Prediction error: {str(e)}")
 
@@ -135,6 +151,34 @@ async def get_model_info(model_name: str, version: str = "latest"):
     except Exception as e:
         logger.error(f"Failed to get model info: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve model information")
+    
+    
+@app.get("/metrics", response_model=Dict[str, Any])
+async def get_metrics():
+    """Get API performance metrics"""
+    try:
+        api_stats = api_metrics.get_api_stats()
+        model_stats = api_metrics.model_monitor.get_prediction_stats(24)
+        
+        return {
+            "api_metrics": api_stats,
+            "model_metrics": model_stats,
+            "generated_at": datetime.now()
+        }
+    except Exception as e:
+        logger.error(f"Failed to get metrics: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve metrics")
+
+
+@app.get("/monitoring/model/{model_name}", response_model=Dict[str, Any])
+async def get_model_health(model_name: str):
+    """Get model health status"""
+    try:
+        health_status = api_metrics.model_monitor.get_model_health(model_name)
+        return health_status
+    except Exception as e:
+        logger.error(f"Failed to get model health: {e}")
+        raise HTTPException(status_code=500, detail="Failed to retrieve model health")
 
 
 @app.exception_handler(Exception)
